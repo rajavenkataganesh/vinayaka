@@ -1,0 +1,35 @@
+# Node / React Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/.env
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Python / FastAPI Backend
+backend/__pycache__/
+backend/*/__pycache__/
+backend/*/*/__pycache__/
+backend/*/*/*/__pycache__/
+*.py[cod]
+*$py.class
+backend/.env
+backend/.venv/
+backend/env/
+backend/venv/
+backend/ENV/
+backend/ganeshmap.db
+
+# Uploads directory contents (keep folder structure with .gitkeep if needed)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# IDE / OS junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
