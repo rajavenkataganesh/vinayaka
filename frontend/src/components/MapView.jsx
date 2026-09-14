@@ -13,35 +13,28 @@ const createGaneshMarkerIcon = (ecoStatus) => {
   const svgHtml = `
     <div style="
       position: relative;
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-      border: 3px solid #FFF;
+      border: 2.5px solid #FFF;
       border-radius: 50%;
-      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      overflow: hidden;
     ">
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 2L19.5 7.5H12.5L16 2Z" fill="#FFD700" />
-        <path d="M10 7.5H22L21 11.5H11L10 7.5Z" fill="#FFF" />
-        <path d="M16 8.5V12.5" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>
-        <path d="M10 12C6.5 12 4.5 14.5 4.5 17C4.5 19.5 6.5 20.5 9 20" stroke="#FFF" stroke-width="2.2" stroke-linecap="round"/>
-        <path d="M22 12C25.5 12 27.5 14.5 27.5 17C27.5 19.5 25.5 20.5 23 20" stroke="#FFF" stroke-width="2.2" stroke-linecap="round"/>
-        <path d="M13.5 14.5C13.5 14.5 14.5 18 15 20C15.5 22 16.5 24 19 24C21.5 24 22.5 22.5 22.5 21C22.5 19.5 21 19 20 19.5" stroke="#FFF" stroke-width="2.8" stroke-linecap="round"/>
-        <circle cx="19.5" cy="19.5" r="1.5" fill="#FFD700"/>
-      </svg>
+      <img src="/ganesh_icon.jpeg" alt="Lord Ganesh" style="width: 100%; height: 100%; object-fit: cover;" />
       <div style="
         position: absolute;
-        bottom: -2px;
-        right: -2px;
-        width: 14px;
-        height: 14px;
+        bottom: 0px;
+        right: 0px;
+        width: 12px;
+        height: 12px;
         background-color: ${badgeColor};
         border: 2px solid white;
         border-radius: 50%;
+        z-index: 10;
       "></div>
     </div>
   `;
