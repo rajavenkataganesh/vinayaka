@@ -38,8 +38,14 @@ export const AiVerificationBadge = ({ aiResult, isAnalyzing = false }) => {
           <AlertTriangle className="w-6 h-6 text-rose-500 shrink-0 mt-0.5" />
         )}
         <div>
-          <h4 className={`font-bold text-base ${isDetected ? 'text-emerald-900' : 'text-rose-900'}`}>
-            {isDetected ? '🐘 Ganesh Idol Detected' : '❌ Ganesh Idol Not Clearly Detected'}
+          <h4 className={`font-bold text-base ${isDetected ? 'text-emerald-900' : 'text-rose-900'} flex items-center gap-1`}>
+            {isDetected ? (
+              <>
+                <span>🕉️</span> <span>Lord Ganesh Idol Detected</span>
+              </>
+            ) : (
+              '❌ Ganesh Idol Not Clearly Detected'
+            )}
           </h4>
           <p className="text-xs text-slate-600 mt-0.5">
             {aiResult.message || (isDetected ? 'Likely Ganesh Idol' : 'Please upload a clearer image.')}

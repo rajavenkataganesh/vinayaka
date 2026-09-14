@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Heart, Shield, MapPin } from 'lucide-react';
+import { Leaf, Shield, MapPin } from 'lucide-react';
+import GaneshIcon from './GaneshIcon';
 
 export const Footer = () => {
   return (
@@ -11,15 +12,16 @@ export const Footer = () => {
           {/* Brand Col */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white text-lg font-bold">
-                🐘
+              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white p-1">
+                <GaneshIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="font-heading font-extrabold text-lg text-white tracking-tight">
-                GANESHMAP
+              <span className="font-heading font-extrabold text-lg text-white tracking-tight flex items-center gap-1">
+                <span>GANESHMAP</span>
+                <span className="text-sm">🕉️</span>
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Find, explore, and celebrate verified Ganesh idols and festival pandals near you with AI-assisted verification.
+              Find, explore, and celebrate verified Lord Ganesh idols and festival pandals near you with AI-assisted verification.
             </p>
             <div className="flex items-center gap-1.5 text-xs text-amber-400 font-medium">
               <Leaf className="w-3.5 h-3.5" />
@@ -85,7 +87,7 @@ export const Footer = () => {
           <p>© {new Date().getFullYear()} GaneshMap. Built for festival community celebration.</p>
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-amber-400 border border-slate-700">
-              DEMO & PRODUCTION READY
+              PRODUCTION READY
             </span>
           </div>
         </div>

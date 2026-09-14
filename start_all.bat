@@ -1,6 +1,6 @@
 @echo off
 echo ===================================================
-echo 🐘 GANESHMAP - Starting Backend & Frontend Servers
+echo 🕉️ GANESHMAP - Starting Backend & Frontend Servers
 echo ===================================================
 
 cd backend

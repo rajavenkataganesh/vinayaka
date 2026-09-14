@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { X, User, Lock, Mail, Sparkles, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react';
+import { X, User, Lock, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import GaneshIcon from '../components/GaneshIcon';
 
 export const AuthPage = ({ isOpen, onClose }) => {
-  const { login, register, loginAsDemoAdmin, loginAsDemoDevotee } = useAuth();
-  const navigate = useNavigate();
+  const { login, register } = useAuth();
 
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [name, setName] = useState('');
@@ -36,31 +35,6 @@ export const AuthPage = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleDemoAdmin = async () => {
-    setLoading(true);
-    try {
-      await loginAsDemoAdmin();
-      onClose();
-      navigate('/admin');
-    } catch (err) {
-      setError('Demo admin login error.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoDevotee = async () => {
-    setLoading(true);
-    try {
-      await loginAsDemoDevotee();
-      onClose();
-    } catch (err) {
-      setError('Demo devotee login error.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-orange-100 relative space-y-6">
@@ -74,14 +48,14 @@ export const AuthPage = ({ isOpen, onClose }) => {
 
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-orange-500 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md shadow-orange-500/20">
-            🐘
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md shadow-orange-500/20 p-2">
+            <GaneshIcon className="w-8 h-8 text-white" />
           </div>
           <h3 className="font-heading font-extrabold text-2xl text-slate-900">
             {mode === 'login' ? 'Devotee Sign In' : 'Create Account'}
           </h3>
           <p className="text-xs text-slate-500">
-            Sign in to submit new Ganesh idols, submit reviews, and report updates.
+            Sign in to submit new Lord Ganesh idols, write reviews, and report updates.
           </p>
         </div>
 
@@ -137,7 +111,7 @@ export const AuthPage = ({ isOpen, onClose }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="devotee@ganeshmap.com"
+                placeholder="user@ganeshmap.com"
                 required
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs font-medium outline-none"
               />
@@ -167,33 +141,6 @@ export const AuthPage = ({ isOpen, onClose }) => {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : mode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
         </form>
-
-        {/* Quick Demo Login Triggers for Reviewers */}
-        <div className="pt-3 border-t border-slate-100 space-y-2 text-center">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Quick One-Click Demo Access
-          </p>
-
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={handleDemoAdmin}
-              disabled={loading}
-              className="py-2.5 px-3 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-extrabold flex items-center justify-center gap-1 border border-amber-300 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              Demo Admin
-            </button>
-
-            <button
-              onClick={handleDemoDevotee}
-              disabled={loading}
-              className="py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-800 text-xs font-extrabold flex items-center justify-center gap-1 border border-orange-200 transition-colors"
-            >
-              <User className="w-3.5 h-3.5 text-orange-600" />
-              Demo Devotee
-            </button>
-          </div>
-        </div>
 
       </div>
     </div>

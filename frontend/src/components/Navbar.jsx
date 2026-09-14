@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MapPin, PlusCircle, Compass, ShieldCheck, User, LogOut, Sparkles, Menu, X, Leaf } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { MapPin, PlusCircle, Compass, ShieldCheck, User, LogOut, Menu, X, Leaf } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import GaneshIcon from './GaneshIcon';
 
 export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onRequestLocation }) => {
-  const { user, isAdmin, logout, loginAsDemoAdmin } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
@@ -104,7 +103,7 @@ export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onReques
               Add Ganesh Idol
             </button>
 
-            {/* Auth / Admin Switcher */}
+            {/* Auth User Profile / Sign In */}
             {user ? (
               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                 <div className="text-right">
@@ -120,24 +119,13 @@ export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onReques
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => loginAsDemoAdmin().then(() => navigate('/admin'))}
-                  className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 flex items-center gap-1"
-                  title="Quick login as Admin to test verification panel"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-600" />
-                  Demo Admin
-                </button>
-
-                <button
-                  onClick={onOpenAuthModal}
-                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-                  title="Login / Register"
-                >
-                  <User className="w-4 h-4" />
-                </button>
-              </div>
+              <button
+                onClick={onOpenAuthModal}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <User className="w-4 h-4" />
+                Sign In
+              </button>
             )}
           </div>
 
@@ -203,20 +191,12 @@ export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onReques
             </button>
 
             {!user ? (
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => { loginAsDemoAdmin().then(() => { navigate('/admin'); setMobileMenuOpen(false); }); }}
-                  className="py-2 rounded-lg bg-amber-100 text-amber-900 text-xs font-bold border border-amber-300"
-                >
-                  ⚡ Demo Admin
-                </button>
-                <button
-                  onClick={() => { onOpenAuthModal(); setMobileMenuOpen(false); }}
-                  className="py-2 rounded-lg bg-slate-800 text-white text-xs font-bold"
-                >
-                  Sign In
-                </button>
-              </div>
+              <button
+                onClick={() => { onOpenAuthModal(); setMobileMenuOpen(false); }}
+                className="w-full py-2.5 rounded-lg bg-slate-800 text-white text-xs font-bold"
+              >
+                Sign In
+              </button>
             ) : (
               <button
                 onClick={() => { logout(); setMobileMenuOpen(false); }}

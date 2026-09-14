@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { fetchAdminStats, fetchAdminSubmissions, approveSubmission, rejectSubmission, fetchAdminReports, resolveReport, fetchAllIdols, deleteIdol, updateIdolInfo } from '../services/api';
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Users, Bot, MapPin, Eye, Trash2, Edit3, Loader2, Sparkles, RefreshCw } from 'lucide-react';
+import { fetchAdminStats, fetchAdminSubmissions, approveSubmission, rejectSubmission, fetchAdminReports, resolveReport, fetchAllIdols, deleteIdol } from '../services/api';
+import { ShieldCheck, MapPin, Trash2, RefreshCw, Bot } from 'lucide-react';
 import CrowdBadge from '../components/CrowdBadge';
+import GaneshIcon from '../components/GaneshIcon';
 
 export const AdminDashboard = () => {
-  const { user, isAdmin, loginAsDemoAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending', 'overview', 'reports', 'idols'
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending', 'reports', 'idols'
   const [stats, setStats] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [reports, setReports] = useState([]);
@@ -17,7 +18,6 @@ export const AdminDashboard = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
-  // Selected view modal for submission details
   const [selectedSub, setSelectedSub] = useState(null);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export const AdminDashboard = () => {
   };
 
   const handleDeleteIdol = async (idolId) => {
-    if (!window.confirm("Are you sure you want to delete this verified Ganesh idol?")) return;
+    if (!window.confirm("Are you sure you want to delete this verified Lord Ganesh idol?")) return;
     try {
       await deleteIdol(idolId);
       loadAllAdminData();
@@ -99,19 +99,13 @@ export const AdminDashboard = () => {
   if (!isAdmin) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
           <ShieldCheck className="w-10 h-10" />
         </div>
-        <h2 className="font-heading font-extrabold text-2xl text-slate-900">Admin Privileges Required</h2>
-        <p className="text-xs text-slate-600">
-          You are currently logged in as a normal user. Log in as an Administrator to review pending submissions and manage reports.
+        <h2 className="font-heading font-extrabold text-2xl text-slate-900">Admin Access Required</h2>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Please sign in with an Administrator account to access the verification dashboard.
         </p>
-        <button
-          onClick={() => loginAsDemoAdmin().then(loadAllAdminData)}
-          className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-md inline-flex items-center gap-2"
-        >
-          <Sparkles className="w-4 h-4" /> One-Click Switch To Demo Admin
-        </button>
       </div>
     );
   }
@@ -125,7 +119,8 @@ export const AdminDashboard = () => {
           <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded">
             Admin Verification Control Center
           </span>
-          <h1 className="font-heading font-black text-3xl text-slate-900 mt-1">
+          <h1 className="font-heading font-black text-3xl text-slate-900 mt-1 flex items-center gap-2">
+            <GaneshIcon className="w-8 h-8 text-orange-600" />
             GaneshMap Admin Dashboard
           </h1>
         </div>
@@ -205,7 +200,7 @@ export const AdminDashboard = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          🐘 Active Verified Idols ({idols.length})
+          🛕 Active Verified Idols ({idols.length})
         </button>
       </div>
 
@@ -368,7 +363,7 @@ export const AdminDashboard = () => {
       {activeTab === 'idols' && (
         <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden p-6 space-y-4">
           <h3 className="font-heading font-extrabold text-lg text-slate-900">
-            Active Verified Ganesh Idols
+            Active Verified Lord Ganesh Idols
           </h3>
 
           <div className="overflow-x-auto">

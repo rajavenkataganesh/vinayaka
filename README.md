@@ -1,22 +1,22 @@
-# 🐘 GaneshMap – Find Ganesh Idols Near You
+# 🕉️ GaneshMap – Find Lord Ganesh Idols Near You
 
 > **"Find. Explore. Celebrate."**  
-> A complete, production-ready location-based web application for discovering verified Ganesh idols, pandals, darshan timings, crowd levels, and eco-friendly immersion guidance with AI vision verification assistance.
+> A complete, production-ready location-based web application for discovering verified Lord Ganesh idols, pandals, darshan timings, crowd levels, and eco-friendly immersion guidance with AI vision verification assistance.
 
 ---
 
 ## 🌟 Features Overview
 
 1. **📍 Current Location Detection**: Detects browser GPS coordinates and computes exact Haversine distance to all pandals.
-2. **🗺️ Interactive Leaflet Map**: Free OpenStreetMap tiles with custom SVG Ganesh markers, user pin, zoom controls, and rich popups.
+2. **🗺️ Interactive Leaflet Map**: Free OpenStreetMap tiles with custom Lord Ganesh vector SVG markers, user pin, zoom controls, and rich popups.
 3. **🔎 Area & Locality Search**: Instant search by city or area (e.g., Vijayawada, Mangalagiri, Guntur, Amaravati, Hyderabad, Mumbai).
-4. **🐘 Comprehensive Idol Details**: Photo gallery, darshan schedule, crowd status (🟢 Low, 🟡 Medium, 🔴 High), eco-friendly badge, ratings/reviews, and turn-by-turn directions launcher.
+4. **🕉️ Comprehensive Idol Details**: Photo gallery, darshan schedule, crowd status (🟢 Low, 🟡 Medium, 🔴 High), eco-friendly badge, ratings/reviews, and turn-by-turn directions launcher.
 5. **➕ Community Idol Submission**: Form with GPS location auto-fill, image preview, file validation, and duplicate location warning (<100m radius check).
 6. **🤖 Computer Vision AI Idol Detection**: Analyzes uploaded images for saffron/turmeric color spectrums and idol contour structures, returning a confidence percentage and status recommendation.
 7. **🛡️ Admin Verification Dashboard**: Panel to review pending submissions, approve/reject community entries, manage verified idols, and resolve reports.
 8. **🚩 User Issue Reporting**: Report wrong location, duplicate entry, inappropriate images, or outdated information.
 9. **♻️ Eco-Friendly Festival Guide**: Educational information on clay idols, natural pigments, seed Ganeshas, and zero-waste immersion practices.
-10. **🔑 User & Admin Authentication**: JWT token authentication with role-based access control and one-click reviewer demo switch.
+10. **🔑 User & Admin Authentication**: JWT token authentication with role-based access control.
 
 ---
 
@@ -67,14 +67,10 @@ start_all.bat
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Default Credentials
 
-For reviewer convenience, the application includes pre-seeded demo accounts:
-
-- **Admin Account**: `admin@ganeshmap.com` / `admin123` (Full verification control)
-- **Devotee Account**: `devotee@ganeshmap.com` / `user123`
-
-*Tip: You can click the **"⚡ Demo Admin"** button in the navigation header to instantly sign in as Admin and test the verification dashboard!*
+- **Admin Account**: `admin@ganeshmap.com` / `admin123`
+- **Devotee Account**: `user@ganeshmap.com` / `user123`
 
 ---
 
@@ -117,7 +113,7 @@ ganeshmap/
 │   └── run.py
 ├── frontend/
 │   ├── src/
-│   │   ├── components/        # MapView, IdolCard, SearchBar, Modals, Badges
+│   │   ├── components/        # MapView, IdolCard, SearchBar, Modals, Badges, GaneshIcon
 │   │   ├── pages/             # HomePage, MapPage, IdolDetailPage, AdminDashboard
 │   │   ├── context/           # AuthContext
 │   │   ├── services/          # Axios API client & browser geolocation helpers

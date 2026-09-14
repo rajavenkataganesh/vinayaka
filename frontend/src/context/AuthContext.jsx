@@ -40,14 +40,6 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
-  const loginAsDemoAdmin = async () => {
-    return login("admin@ganeshmap.com", "admin123");
-  };
-
-  const loginAsDemoDevotee = async () => {
-    return login("devotee@ganeshmap.com", "user123");
-  };
-
   const logout = () => {
     localStorage.removeItem('ganeshmap_token');
     setToken(null);
@@ -63,8 +55,6 @@ export const AuthProvider = ({ children }) => {
         isAdmin: user?.role === 'admin',
         login,
         register,
-        loginAsDemoAdmin,
-        loginAsDemoDevotee,
         logout
       }}
     >

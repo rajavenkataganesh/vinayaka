@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, MapPin, Upload, Sparkles, AlertTriangle, CheckCircle2, Loader2, Bot } from 'lucide-react';
+import { X, MapPin, Upload, AlertTriangle, CheckCircle2, Loader2, Bot } from 'lucide-react';
 import { getCurrentPosition } from '../services/geo';
 import { detectAiIdol, checkDuplicateLocation, createSubmission } from '../services/api';
 import AiVerificationBadge from './AiVerificationBadge';
+import GaneshIcon from './GaneshIcon';
 
 export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -41,7 +42,6 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Trigger duplicate check when lat/lng change
     if (name === 'latitude' || name === 'longitude') {
       const lat = name === 'latitude' ? parseFloat(value) : parseFloat(formData.latitude);
       const lng = name === 'longitude' ? parseFloat(value) : parseFloat(formData.longitude);
@@ -89,14 +89,12 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
 
     if (!file) return;
 
-    // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setImageError('Invalid image format. Please upload JPG, PNG, or WEBP.');
       return;
     }
 
-    // Validate file size (max 8MB)
     if (file.size > 8 * 1024 * 1024) {
       setImageError('Image file size must be less than 8MB.');
       return;
@@ -105,7 +103,6 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
 
-    // Trigger AI Detection automatically upon upload
     setIsAnalyzingAi(true);
     try {
       const aiData = await detectAiIdol(file);
@@ -155,7 +152,7 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
       setSubmitSuccess(true);
       if (onSuccess) onSuccess();
     } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Failed to submit Ganesh idol. Please try again.');
+      setErrorMsg(err.response?.data?.detail || 'Failed to submit Lord Ganesh idol. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -176,13 +173,14 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
         
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-orange-100 px-6 py-4 flex items-center justify-between z-10">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold text-lg">
-              🐘
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 text-white flex items-center justify-center font-bold p-1.5 shadow-sm">
+              <GaneshIcon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-heading font-extrabold text-lg text-slate-900">
-                Add New Ganesh Idol / Pandal
+              <h3 className="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-1">
+                <span>Add New Lord Ganesh Idol</span>
+                <span>🕉️</span>
               </h3>
               <p className="text-xs text-slate-500">Submit pandal details for admin verification</p>
             </div>
@@ -345,7 +343,7 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
               {/* Image Upload & AI Detection */}
               <div className="space-y-3">
                 <label className="block text-xs font-bold text-slate-700">
-                  Upload Ganesh Idol Photo & AI Verification
+                  Upload Lord Ganesh Idol Photo & AI Verification
                 </label>
 
                 <div className="border-2 border-dashed border-orange-200 rounded-2xl p-4 text-center hover:bg-orange-50/50 transition-colors relative">
@@ -485,7 +483,7 @@ export const AddIdolModal = ({ isOpen, onClose, onSuccess }) => {
                     </>
                   ) : (
                     <>
-                      🐘 Submit For Admin Verification
+                      <span>🕉️</span> Submit For Admin Verification
                     </>
                   )}
                 </button>
