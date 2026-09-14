@@ -106,7 +106,9 @@ const RecenterMap = ({ center, zoom }) => {
 export const MapView = ({ idols = [], userLocation = null, selectedRoute = null, height = "500px" }) => {
   const navigate = useNavigate();
   
-  const defaultCenter = userLocation
+  const isValidLoc = (loc) => loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && !isNaN(loc.lat) && !isNaN(loc.lng);
+
+  const defaultCenter = isValidLoc(userLocation)
     ? [userLocation.lat, userLocation.lng]
     : [16.5062, 80.6480];
 
@@ -137,7 +139,7 @@ export const MapView = ({ idols = [], userLocation = null, selectedRoute = null,
     <div style={{ height }} className="relative w-full rounded-2xl overflow-hidden shadow-lg border border-orange-100">
       <MapContainer
         center={defaultCenter}
-        zoom={userLocation ? 14 : 12}
+        zoom={isValidLoc(userLocation) ? 14 : 12}
         scrollWheelZoom={true}
         className="w-full h-full"
       >
@@ -149,7 +151,7 @@ export const MapView = ({ idols = [], userLocation = null, selectedRoute = null,
         <RecenterMap center={routeCoords ? routeCoords[0] : defaultCenter} />
 
         {/* User Location Marker */}
-        {userLocation && (
+        {isValidLoc(userLocation) && (
           <>
             <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
               <Popup>
