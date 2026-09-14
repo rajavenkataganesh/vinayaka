@@ -61,8 +61,9 @@ export const IdolCard = ({ idol }) => {
             </span>
           </div>
 
-          <h3 className="font-heading font-bold text-base text-slate-900 mt-1.5 line-clamp-1 group-hover:text-orange-600 transition-colors">
-            🐘 {idol.name}
+          <h3 className="font-heading font-bold text-base text-slate-900 mt-1.5 line-clamp-1 group-hover:text-orange-600 transition-colors flex items-center gap-1.5">
+            <span className="text-amber-600 font-extrabold">🕉️</span>
+            <span>{idol.name}</span>
           </h3>
 
           <p className="text-xs text-slate-500 flex items-center gap-1 mt-1 line-clamp-1">

@@ -64,7 +64,7 @@ export const IdolDetailPage = ({ userLocation }) => {
   if (!idol) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-        <p className="text-lg font-bold text-slate-800">Ganesh Idol not found.</p>
+        <p className="text-lg font-bold text-slate-800">Lord Ganesh Idol not found.</p>
         <Link to="/map" className="px-4 py-2 rounded-xl bg-orange-500 text-white font-bold text-xs inline-block">
           Back to Map
         </Link>
@@ -119,8 +119,8 @@ export const IdolDetailPage = ({ userLocation }) => {
             </span>
           </div>
 
-          <h1 className="font-heading font-black text-2xl sm:text-4xl leading-tight">
-            🐘 {idol.name}
+          <h1 className="font-heading font-black text-2xl sm:text-4xl leading-tight flex items-center gap-2">
+            <span>🕉️</span> <span>{idol.name}</span>
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-1.5">

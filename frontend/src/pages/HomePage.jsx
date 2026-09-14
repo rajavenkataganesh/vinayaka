@@ -5,6 +5,7 @@ import MapView from '../components/MapView';
 import IdolCard from '../components/IdolCard';
 import SearchBar from '../components/SearchBar';
 import EcoGuideSection from '../components/EcoGuideSection';
+import GaneshIcon from '../components/GaneshIcon';
 import { fetchNearbyIdols, fetchAllIdols, fetchPublicStats } from '../services/api';
 import { getCurrentPosition } from '../services/geo';
 
@@ -52,10 +53,10 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
     try {
       const pos = await onRequestLocation();
       if (pos) {
-        setLocationStatus('Finding nearby verified Ganesh idols...');
+        setLocationStatus('Finding nearby verified Lord Ganesh idols...');
         const nearby = await fetchNearbyIdols(pos.lat, pos.lng);
         setIdols(nearby);
-        setLocationStatus(`Found ${nearby.length} Ganesh idols near your location!`);
+        setLocationStatus(`Found ${nearby.length} Lord Ganesh idols near your location!`);
       }
     } catch (err) {
       setLocationStatus(err.message || 'Location permission denied. Showing all areas.');
@@ -84,15 +85,19 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
             <span>Vinayaka Chaturthi 2026 Special</span>
           </div>
 
-          <h1 className="font-heading font-black text-4xl sm:text-6xl text-slate-900 tracking-tight leading-none">
-            🐘 GANESHMAP
+          <h1 className="font-heading font-black text-4xl sm:text-6xl text-slate-900 tracking-tight leading-none flex flex-col items-center justify-center gap-2">
+            <div className="flex items-center gap-3">
+              <GaneshIcon className="w-12 h-12 text-orange-600" />
+              <span>GANESHMAP</span>
+              <span className="text-3xl">🕉️</span>
+            </div>
             <span className="block text-2xl sm:text-4xl font-extrabold bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 bg-clip-text text-transparent mt-2">
-              Find Ganesh Idols Near You
+              Find Lord Ganesh Idols Near You
             </span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-600 leading-relaxed">
-            Discover verified Ganesh idols, grand pandals, darshan timings, crowd levels, and eco-friendly immersion spots in Vijayawada, Mangalagiri, Guntur, Amaravati, Hyderabad & beyond.
+            Discover verified Lord Ganesh idols, grand pandals, darshan timings, crowd levels, and eco-friendly immersion spots in Vijayawada, Mangalagiri, Guntur, Amaravati, Hyderabad & beyond.
           </p>
 
           {/* Call to Actions */}
@@ -186,8 +191,8 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
             <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
               Live Map View
             </span>
-            <h2 className="font-heading font-extrabold text-2xl text-slate-900">
-              Nearby Ganesh Idols & Pandals
+            <h2 className="font-heading font-extrabold text-2xl text-slate-900 flex items-center gap-2">
+              <span>🕉️</span> Nearby Lord Ganesh Idols & Pandals
             </h2>
           </div>
 
@@ -205,8 +210,8 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
       {/* NEARBY IDOLS GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading font-extrabold text-2xl text-slate-900">
-            {userLocation ? '📍 Idols Sorted By Distance' : '🐘 Popular Ganesh Pandals'}
+          <h2 className="font-heading font-extrabold text-2xl text-slate-900 flex items-center gap-2">
+            <span>🕉️</span> {userLocation ? 'Idols Sorted By Distance' : 'Popular Ganesh Pandals'}
           </h2>
           
           <button
@@ -261,9 +266,9 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
               <div className="w-10 h-10 rounded-xl bg-amber-500 text-white font-extrabold flex items-center justify-center text-base">
                 2
               </div>
-              <h3 className="font-heading font-bold text-base text-slate-900">🐘 Find Nearby Idols</h3>
+              <h3 className="font-heading font-bold text-base text-slate-900">🕉️ Find Nearby Idols</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                View verified Ganesh idols near you automatically sorted by exact Haversine distance.
+                View verified Lord Ganesh idols near you automatically sorted by exact Haversine distance.
               </p>
             </div>
 

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapPin, PlusCircle, Compass, ShieldCheck, User, LogOut, Sparkles, Menu, X, Leaf } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import GaneshIcon from './GaneshIcon';
 
 export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onRequestLocation }) => {
-  const { user, isAdmin, logout, loginAsDemoAdmin, loginAsDemoDevotee } = useAuth();
+  const { user, isAdmin, logout, loginAsDemoAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,16 +18,19 @@ export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onReques
         <div className="flex items-center justify-between h-16">
           
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform">
-              <span className="text-xl">🐘</span>
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform p-1.5">
+              <GaneshIcon className="w-7 h-7 text-white" />
             </div>
             <div>
-              <span className="font-heading font-extrabold text-xl tracking-tight bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 bg-clip-text text-transparent">
-                GANESHMAP
-              </span>
-              <span className="block text-[10px] font-semibold tracking-widest uppercase text-amber-700 -mt-1">
-                Find Idols Near You
+              <div className="flex items-center gap-1">
+                <span className="font-heading font-black text-xl tracking-tight bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 bg-clip-text text-transparent">
+                  GANESHMAP
+                </span>
+                <span className="text-sm">🕉️</span>
+              </div>
+              <span className="block text-[10px] font-bold tracking-widest uppercase text-amber-700 -mt-1">
+                Lord Ganesh Idol Finder
               </span>
             </div>
           </Link>
@@ -143,7 +147,7 @@ export const Navbar = ({ onOpenAddModal, onOpenAuthModal, userLocation, onReques
               onClick={onOpenAddModal}
               className="p-2 rounded-lg bg-orange-500 text-white font-bold text-xs"
             >
-              + Add
+              + Add Idol
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
