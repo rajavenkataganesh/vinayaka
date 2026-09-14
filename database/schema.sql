@@ -42,9 +42,37 @@ CREATE TABLE IF NOT EXISTS idols (
 
 CREATE INDEX IF NOT EXISTS idx_idols_area ON idols(area);
 CREATE INDEX IF NOT EXISTS idx_idols_status ON idols(verification_status);
-CREATE INDEX IF NOT EXISTS idx_idols_lat_lng ON idols(latitude, longitude);
 
--- 3. Community Submissions Table
+-- 3. Festival Activities & Seva Information Table
+CREATE TABLE IF NOT EXISTS activities (
+    id SERIAL PRIMARY KEY,
+    idol_id INTEGER NOT NULL REFERENCES idols(id) ON DELETE CASCADE,
+    activity_type VARCHAR(50) NOT NULL, -- 'prasadam', 'annadanam', 'uregimpu'
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    date VARCHAR(50) NOT NULL,
+    start_time VARCHAR(50) NOT NULL,
+    end_time VARCHAR(50),
+    location VARCHAR(255) NOT NULL,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    organizer_name VARCHAR(255),
+    contact_number VARCHAR(50),
+    status VARCHAR(50) DEFAULT 'Upcoming', -- 'Upcoming', 'Available Now', 'In Progress', 'Completed', 'Cancelled'
+    verification_status VARCHAR(50) DEFAULT 'approved',
+    start_location VARCHAR(255),
+    end_location VARCHAR(255),
+    route_coordinates TEXT, -- JSON array of [[lat, lng], ...]
+    crowd_status VARCHAR(50) DEFAULT 'Medium',
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_activities_idol_id ON activities(idol_id);
+CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(activity_type);
+
+-- 4. Community Submissions Table
 CREATE TABLE IF NOT EXISTS submissions (
     id SERIAL PRIMARY KEY,
     submitted_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -71,9 +99,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
-
--- 4. User Issue Reports Table
+-- 5. User Issue Reports Table
 CREATE TABLE IF NOT EXISTS reports (
     id SERIAL PRIMARY KEY,
     idol_id INTEGER NOT NULL REFERENCES idols(id) ON DELETE CASCADE,
@@ -84,10 +110,7 @@ CREATE TABLE IF NOT EXISTS reports (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_reports_idol_id ON reports(idol_id);
-CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
-
--- 5. Ratings and Reviews Table
+-- 6. Ratings and Reviews Table
 CREATE TABLE IF NOT EXISTS ratings (
     id SERIAL PRIMARY KEY,
     idol_id INTEGER NOT NULL REFERENCES idols(id) ON DELETE CASCADE,
@@ -97,5 +120,3 @@ CREATE TABLE IF NOT EXISTS ratings (
     review TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX IF NOT EXISTS idx_ratings_idol_id ON ratings(idol_id);

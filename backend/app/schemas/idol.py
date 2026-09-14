@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class IdolBase(BaseModel):
@@ -49,6 +49,11 @@ class IdolResponse(IdolBase):
     distance_meters: Optional[float] = None
     avg_rating: Optional[float] = 4.8
     total_reviews: Optional[int] = 0
+    
+    # Activity Badges Flags
+    has_prasadam: Optional[bool] = False
+    has_annadanam: Optional[bool] = False
+    has_uregimpu: Optional[bool] = False
 
     class Config:
         from_attributes = True

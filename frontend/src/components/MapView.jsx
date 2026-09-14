@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import { formatDistance, getGoogleMapsDirectionsUrl } from '../services/geo';
 import CrowdBadge from './CrowdBadge';
 import { Navigation, Star, Clock, MapPin, Eye } from 'lucide-react';
 
-// Custom Lord Ganesh SVG Marker Icon for Leaflet
 const createGaneshMarkerIcon = (ecoStatus) => {
   const isEco = ecoStatus === 'Eco-Friendly';
   const badgeColor = isEco ? '#10B981' : '#F59E0B';
@@ -26,15 +25,11 @@ const createGaneshMarkerIcon = (ecoStatus) => {
       color: white;
     ">
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Crown / Mukut -->
         <path d="M16 2L19.5 7.5H12.5L16 2Z" fill="#FFD700" />
         <path d="M10 7.5H22L21 11.5H11L10 7.5Z" fill="#FFF" />
-        <!-- Tilak -->
         <path d="M16 8.5V12.5" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>
-        <!-- Ears -->
         <path d="M10 12C6.5 12 4.5 14.5 4.5 17C4.5 19.5 6.5 20.5 9 20" stroke="#FFF" stroke-width="2.2" stroke-linecap="round"/>
         <path d="M22 12C25.5 12 27.5 14.5 27.5 17C27.5 19.5 25.5 20.5 23 20" stroke="#FFF" stroke-width="2.2" stroke-linecap="round"/>
-        <!-- Trunk -->
         <path d="M13.5 14.5C13.5 14.5 14.5 18 15 20C15.5 22 16.5 24 19 24C21.5 24 22.5 22.5 22.5 21C22.5 19.5 21 19 20 19.5" stroke="#FFF" stroke-width="2.8" stroke-linecap="round"/>
         <circle cx="19.5" cy="19.5" r="1.5" fill="#FFD700"/>
       </svg>
@@ -57,6 +52,24 @@ const createGaneshMarkerIcon = (ecoStatus) => {
     iconSize: [46, 46],
     iconAnchor: [23, 23],
     popupAnchor: [0, -23]
+  });
+};
+
+const createStartIcon = () => {
+  return L.divIcon({
+    html: `<div style="background:#10B981; color:white; border:2px solid white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; shadow:0 2px 6px rgba(0,0,0,0.3)">🟢</div>`,
+    className: 'start-route-pin',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
+};
+
+const createEndIcon = () => {
+  return L.divIcon({
+    html: `<div style="background:#EF4444; color:white; border:2px solid white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; shadow:0 2px 6px rgba(0,0,0,0.3)">🔴</div>`,
+    className: 'end-route-pin',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
   });
 };
 
@@ -87,7 +100,6 @@ const createUserIcon = () => {
   });
 };
 
-// Component to dynamically re-center map view
 const RecenterMap = ({ center, zoom }) => {
   const map = useMap();
   useEffect(() => {
@@ -98,7 +110,7 @@ const RecenterMap = ({ center, zoom }) => {
   return null;
 };
 
-export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null, height = "500px" }) => {
+export const MapView = ({ idols = [], userLocation = null, selectedRoute = null, height = "500px" }) => {
   const navigate = useNavigate();
   
   const defaultCenter = userLocation
@@ -115,6 +127,18 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
   };
 
   const userIcon = createUserIcon();
+  const startIcon = createStartIcon();
+  const endIcon = createEndIcon();
+
+  // Parse Uregimpu route polyline coordinates if available
+  let routeCoords = null;
+  if (selectedRoute?.route_coordinates) {
+    try {
+      routeCoords = JSON.parse(selectedRoute.route_coordinates);
+    } catch (e) {
+      console.warn("Invalid route coordinates JSON:", e);
+    }
+  }
 
   return (
     <div style={{ height }} className="relative w-full rounded-2xl overflow-hidden shadow-lg border border-orange-100">
@@ -129,7 +153,7 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <RecenterMap center={defaultCenter} />
+        <RecenterMap center={routeCoords ? routeCoords[0] : defaultCenter} />
 
         {/* User Location Marker */}
         {userLocation && (
@@ -150,6 +174,34 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
           </>
         )}
 
+        {/* Uregimpu Procession Route Polyline */}
+        {routeCoords && routeCoords.length > 0 && (
+          <>
+            <Polyline
+              positions={routeCoords}
+              pathOptions={{ color: '#9333EA', weight: 5, opacity: 0.85, dashArray: '8, 8' }}
+            />
+
+            {/* Starting Point Marker */}
+            <Marker position={routeCoords[0]} icon={startIcon}>
+              <Popup>
+                <div className="p-2 text-xs font-bold text-emerald-700">
+                  🟢 Procession Start: {selectedRoute.start_location || 'Main Pandal'}
+                </div>
+              </Popup>
+            </Marker>
+
+            {/* Ending Point Marker */}
+            <Marker position={routeCoords[routeCoords.length - 1]} icon={endIcon}>
+              <Popup>
+                <div className="p-2 text-xs font-bold text-rose-700">
+                  🔴 Procession End: {selectedRoute.end_location || 'Visarjan Point'}
+                </div>
+              </Popup>
+            </Marker>
+          </>
+        )}
+
         {/* Lord Ganesh Idol Markers */}
         {idols.map((idol) => {
           return (
@@ -160,7 +212,6 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
             >
               <Popup>
                 <div className="p-3 space-y-2">
-                  {/* Image Thumbnail */}
                   {idol.image_url && (
                     <div className="w-full h-28 rounded-lg overflow-hidden relative bg-slate-100">
                       <img
@@ -174,7 +225,6 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
                     </div>
                   )}
 
-                  {/* Header */}
                   <div>
                     <h3 className="font-heading font-bold text-sm text-slate-900 line-clamp-1 flex items-center gap-1">
                       <span>🕉️</span> <span>{idol.name}</span>
@@ -185,7 +235,15 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
                     </p>
                   </div>
 
-                  {/* Badges & Distance */}
+                  {/* Activity Indicators in Popup */}
+                  {(idol.has_prasadam || idol.has_annadanam || idol.has_uregimpu) && (
+                    <div className="flex flex-wrap gap-1 text-[10px] font-extrabold pt-1">
+                      {idol.has_prasadam && <span className="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded">🙏 Prasadam</span>}
+                      {idol.has_annadanam && <span className="bg-orange-100 text-orange-900 px-1.5 py-0.5 rounded">🍚 Annadanam</span>}
+                      {idol.has_uregimpu && <span className="bg-purple-100 text-purple-900 px-1.5 py-0.5 rounded">🥁 Uregimpu</span>}
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between text-xs text-slate-600 pt-1 border-t border-slate-100">
                     <span className="font-semibold text-orange-700 bg-orange-50 px-2 py-0.5 rounded">
                       📏 {idol.distance_meters ? formatDistance(idol.distance_meters) : idol.area}
@@ -196,13 +254,11 @@ export const MapView = ({ idols = [], userLocation = null, selectedIdolId = null
                     </span>
                   </div>
 
-                  {/* Timings */}
                   <div className="text-[11px] text-slate-500 flex items-center gap-1">
                     <Clock className="w-3 h-3 text-slate-400" />
                     <span>{idol.opening_time || '06:00 AM'} - {idol.closing_time || '10:30 PM'}</span>
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="grid grid-cols-2 gap-1.5 pt-2">
                     <button
                       onClick={() => navigate(`/idol/${idol.id}`)}

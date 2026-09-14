@@ -7,8 +7,10 @@ from app.models.user import User
 from app.models.idol import Idol
 from app.models.submission import Submission
 from app.models.report import Report
+from app.models.activity import Activity
 from app.schemas.submission import SubmissionResponse
 from app.schemas.idol import IdolResponse, IdolUpdate
+from app.schemas.activity import ActivityResponse
 from app.utils.auth import get_current_admin_user
 
 router = APIRouter(prefix="/api/admin", tags=["Admin Dashboard"])
@@ -22,30 +24,41 @@ def get_admin_dashboard_stats(
     pending_submissions = db.query(Submission).filter(Submission.status == "pending").count()
     rejected_submissions = db.query(Submission).filter(Submission.status == "rejected").count()
     total_reports = db.query(Report).filter(Report.status == "pending").count()
+    pending_activities = db.query(Activity).filter(Activity.verification_status == "pending").count()
     registered_users = db.query(User).count()
-
-    # Eco status distribution
-    eco_dist = db.query(Idol.eco_status, func.count(Idol.id)).filter(Idol.verification_status == "verified").group_by(Idol.eco_status).all()
-    eco_data = {status or "Unknown": count for status, count in eco_dist}
-
-    # Crowd status distribution
-    crowd_dist = db.query(Idol.crowd_status, func.count(Idol.id)).filter(Idol.verification_status == "verified").group_by(Idol.crowd_status).all()
-    crowd_data = {status or "Low": count for status, count in crowd_dist}
-
-    # Idols by area
-    area_dist = db.query(Idol.area, func.count(Idol.id)).filter(Idol.verification_status == "verified").group_by(Idol.area).all()
-    area_data = {area: count for area, count in area_dist}
 
     return {
         "total_verified_idols": total_verified,
         "pending_submissions": pending_submissions,
         "rejected_submissions": rejected_submissions,
         "pending_reports": total_reports,
-        "registered_users": registered_users,
-        "eco_distribution": eco_data,
-        "crowd_distribution": crowd_data,
-        "area_distribution": area_data
+        "pending_activities": pending_activities,
+        "registered_users": registered_users
     }
+
+@router.get("/activities", response_model=List[ActivityResponse])
+def get_admin_activities(
+    status_filter: Optional[str] = None,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin_user)
+):
+    query = db.query(Activity)
+    if status_filter:
+        query = query.filter(Activity.verification_status == status_filter)
+    else:
+        query = query.order_by(Activity.created_at.desc())
+    
+    activities = query.all()
+    res = []
+    for act in activities:
+        idol = db.query(Idol).filter(Idol.id == act.idol_id).first()
+        resp = ActivityResponse.from_orm(act)
+        if idol:
+            resp.idol_name = idol.name
+            resp.idol_area = idol.area
+            resp.idol_image_url = idol.image_url
+        res.append(resp)
+    return res
 
 @router.get("/submissions", response_model=List[SubmissionResponse])
 def get_submissions(
@@ -77,7 +90,6 @@ def approve_submission(
     sub.status = "approved"
     sub.admin_notes = "Approved by admin."
 
-    # Create new verified Idol entry
     new_idol = Idol(
         name=sub.idol_name,
         description=sub.description,

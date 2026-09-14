@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { fetchAdminStats, fetchAdminSubmissions, approveSubmission, rejectSubmission, fetchAdminReports, resolveReport, fetchAllIdols, deleteIdol } from '../services/api';
-import { ShieldCheck, MapPin, Trash2, RefreshCw, Bot } from 'lucide-react';
+import { fetchAdminStats, fetchAdminSubmissions, approveSubmission, rejectSubmission, fetchAdminReports, resolveReport, fetchAllIdols, deleteIdol, fetchAdminActivities, approveActivity, deleteActivity } from '../services/api';
+import { ShieldCheck, MapPin, Trash2, RefreshCw, Bot, Sparkles, CheckCircle2 } from 'lucide-react';
 import CrowdBadge from '../components/CrowdBadge';
 import GaneshIcon from '../components/GaneshIcon';
 
 export const AdminDashboard = () => {
   const { user, isAdmin } = useAuth();
   
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending', 'reports', 'idols'
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending', 'activities', 'reports', 'idols'
   const [stats, setStats] = useState(null);
   const [submissions, setSubmissions] = useState([]);
+  const [adminActivities, setAdminActivities] = useState([]);
   const [reports, setReports] = useState([]);
   const [idols, setIdols] = useState([]);
 
@@ -35,6 +36,9 @@ export const AdminDashboard = () => {
       const subsData = await fetchAdminSubmissions('pending');
       setSubmissions(subsData);
 
+      const actsData = await fetchAdminActivities();
+      setAdminActivities(actsData);
+
       const reportsData = await fetchAdminReports();
       setReports(reportsData);
 
@@ -47,7 +51,7 @@ export const AdminDashboard = () => {
     }
   };
 
-  const handleApprove = async (subId) => {
+  const handleApproveSubmission = async (subId) => {
     setActionLoading(true);
     setMsg('');
     try {
@@ -62,7 +66,7 @@ export const AdminDashboard = () => {
     }
   };
 
-  const handleReject = async (subId) => {
+  const handleRejectSubmission = async (subId) => {
     setActionLoading(true);
     setMsg('');
     try {
@@ -74,6 +78,26 @@ export const AdminDashboard = () => {
       setMsg('Error rejecting submission.');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleApproveActivity = async (actId) => {
+    try {
+      await approveActivity(actId);
+      setMsg('✅ Seva activity approved!');
+      loadAllAdminData();
+    } catch (err) {
+      console.error("Approve activity error:", err);
+    }
+  };
+
+  const handleDeleteActivity = async (actId) => {
+    if (!window.confirm("Delete this activity?")) return;
+    try {
+      await deleteActivity(actId);
+      loadAllAdminData();
+    } catch (err) {
+      console.error("Delete activity error:", err);
     }
   };
 
@@ -141,15 +165,20 @@ export const AdminDashboard = () => {
       )}
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <div className="p-4 rounded-2xl bg-white border border-orange-100 shadow-sm space-y-1">
           <span className="text-xs font-bold text-slate-500 uppercase">Verified Idols</span>
           <span className="block font-heading font-black text-2xl text-emerald-600">{stats?.total_verified_idols || 0}</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-orange-100 shadow-sm space-y-1">
-          <span className="text-xs font-bold text-slate-500 uppercase">Pending Review</span>
+          <span className="text-xs font-bold text-slate-500 uppercase">Pending Idols</span>
           <span className="block font-heading font-black text-2xl text-amber-600">{stats?.pending_submissions || 0}</span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-orange-100 shadow-sm space-y-1">
+          <span className="text-xs font-bold text-slate-500 uppercase">Pending Sevas</span>
+          <span className="block font-heading font-black text-2xl text-purple-600">{stats?.pending_activities || 0}</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-orange-100 shadow-sm space-y-1">
@@ -178,7 +207,18 @@ export const AdminDashboard = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          📋 Pending Submissions ({submissions.length})
+          📋 Pending Idols ({submissions.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('activities')}
+          className={`px-5 py-3 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
+            activeTab === 'activities'
+              ? 'border-orange-500 text-orange-600 bg-orange-50/50'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          🎉 Seva Activities ({adminActivities.length})
         </button>
 
         <button
@@ -200,7 +240,7 @@ export const AdminDashboard = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          🛕 Active Verified Idols ({idols.length})
+          🛕 Active Idols ({idols.length})
         </button>
       </div>
 
@@ -213,7 +253,7 @@ export const AdminDashboard = () => {
 
           {submissions.length === 0 ? (
             <div className="p-8 text-center text-xs font-bold text-slate-500 bg-slate-50 rounded-2xl">
-              🎉 No pending submissions! All community Ganesh idols are verified.
+              🎉 No pending idol submissions! All community Ganesh idols are verified.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -238,14 +278,12 @@ export const AdminDashboard = () => {
                           className="w-14 h-12 rounded-lg object-cover bg-slate-100"
                         />
                       </td>
-
                       <td className="p-3">
                         <span className="font-bold text-slate-900 block">{sub.idol_name}</span>
                         <span className="text-slate-500 text-[11px] flex items-center gap-1">
                           <MapPin className="w-3 h-3 text-orange-500" /> {sub.area} ({sub.address})
                         </span>
                       </td>
-
                       <td className="p-3">
                         <div className="flex items-center gap-1.5">
                           <Bot className="w-4 h-4 text-amber-600" />
@@ -256,38 +294,16 @@ export const AdminDashboard = () => {
                           </span>
                         </div>
                       </td>
-
-                      <td className="p-3 text-slate-600">
-                        {sub.submitter_name || 'Anonymous Devotee'}
-                      </td>
-
+                      <td className="p-3 text-slate-600">{sub.submitter_name || 'Anonymous Devotee'}</td>
                       <td className="p-3">
                         <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 uppercase">
                           {sub.status}
                         </span>
                       </td>
-
                       <td className="p-3 text-right space-x-1.5">
-                        <button
-                          onClick={() => setSelectedSub(sub)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => handleApprove(sub.id)}
-                          disabled={actionLoading}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleReject(sub.id)}
-                          disabled={actionLoading}
-                          className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold"
-                        >
-                          Reject
-                        </button>
+                        <button onClick={() => setSelectedSub(sub)} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">View</button>
+                        <button onClick={() => handleApproveSubmission(sub.id)} disabled={actionLoading} className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">Approve</button>
+                        <button onClick={() => handleRejectSubmission(sub.id)} disabled={actionLoading} className="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold">Reject</button>
                       </td>
                     </tr>
                   ))}
@@ -298,57 +314,49 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* TAB 2: REPORTS TABLE */}
-      {activeTab === 'reports' && (
+      {/* TAB 2: FESTIVAL ACTIVITIES TABLE */}
+      {activeTab === 'activities' && (
         <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden p-6 space-y-4">
           <h3 className="font-heading font-extrabold text-lg text-slate-900">
-            User Issue Reports
+            Seva Activities Verification Manager
           </h3>
 
-          {reports.length === 0 ? (
+          {adminActivities.length === 0 ? (
             <div className="p-8 text-center text-xs font-bold text-slate-500 bg-slate-50 rounded-2xl">
-              No reported issues.
+              No activity submissions.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50 text-slate-500 uppercase font-extrabold border-b border-slate-200">
-                    <th className="p-3">Report ID</th>
-                    <th className="p-3">Idol ID</th>
                     <th className="p-3">Type</th>
-                    <th className="p-3">Details</th>
+                    <th className="p-3">Title</th>
+                    <th className="p-3">Pandal / Idol</th>
+                    <th className="p-3">Timing</th>
                     <th className="p-3">Status</th>
                     <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  {reports.map((rep) => (
-                    <tr key={rep.id}>
-                      <td className="p-3 font-mono font-bold">#{rep.id}</td>
-                      <td className="p-3 font-bold text-orange-600">Idol #{rep.idol_id}</td>
-                      <td className="p-3 font-bold text-rose-600">{rep.report_type}</td>
-                      <td className="p-3 text-slate-600">{rep.description || 'N/A'}</td>
+                  {adminActivities.map((act) => (
+                    <tr key={act.id}>
+                      <td className="p-3 uppercase font-extrabold text-orange-700">{act.activity_type}</td>
+                      <td className="p-3 font-bold text-slate-900">{act.title}</td>
+                      <td className="p-3 text-slate-600">{act.idol_name || `Idol #${act.idol_id}`}</td>
+                      <td className="p-3 text-slate-600">{act.date} • {act.start_time}</td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                          rep.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          act.verification_status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                         }`}>
-                          {rep.status}
+                          {act.verification_status}
                         </span>
                       </td>
                       <td className="p-3 text-right space-x-1">
-                        <button
-                          onClick={() => handleResolveReport(rep.id, 'resolved')}
-                          className="px-3 py-1 rounded bg-emerald-600 text-white font-bold"
-                        >
-                          Resolve
-                        </button>
-                        <button
-                          onClick={() => handleResolveReport(rep.id, 'dismissed')}
-                          className="px-3 py-1 rounded bg-slate-200 text-slate-700 font-bold"
-                        >
-                          Dismiss
-                        </button>
+                        {act.verification_status !== 'approved' && (
+                          <button onClick={() => handleApproveActivity(act.id)} className="px-3 py-1 rounded bg-emerald-600 text-white font-bold">Approve</button>
+                        )}
+                        <button onClick={() => handleDeleteActivity(act.id)} className="px-3 py-1 rounded bg-rose-600 text-white font-bold">Delete</button>
                       </td>
                     </tr>
                   ))}
@@ -359,13 +367,52 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* TAB 3: VERIFIED IDOLS MANAGER TABLE */}
+      {/* TAB 3: REPORTS TABLE */}
+      {activeTab === 'reports' && (
+        <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden p-6 space-y-4">
+          <h3 className="font-heading font-extrabold text-lg text-slate-900">User Issue Reports</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="bg-slate-50 text-slate-500 uppercase font-extrabold border-b border-slate-200">
+                  <th className="p-3">Report ID</th>
+                  <th className="p-3">Idol ID</th>
+                  <th className="p-3">Type</th>
+                  <th className="p-3">Details</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {reports.map((rep) => (
+                  <tr key={rep.id}>
+                    <td className="p-3 font-mono font-bold">#{rep.id}</td>
+                    <td className="p-3 font-bold text-orange-600">Idol #{rep.idol_id}</td>
+                    <td className="p-3 font-bold text-rose-600">{rep.report_type}</td>
+                    <td className="p-3 text-slate-600">{rep.description || 'N/A'}</td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                        rep.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {rep.status}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right space-x-1">
+                      <button onClick={() => handleResolveReport(rep.id, 'resolved')} className="px-3 py-1 rounded bg-emerald-600 text-white font-bold">Resolve</button>
+                      <button onClick={() => handleResolveReport(rep.id, 'dismissed')} className="px-3 py-1 rounded bg-slate-200 text-slate-700 font-bold">Dismiss</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: VERIFIED IDOLS TABLE */}
       {activeTab === 'idols' && (
         <div className="bg-white rounded-3xl border border-orange-100 shadow-sm overflow-hidden p-6 space-y-4">
-          <h3 className="font-heading font-extrabold text-lg text-slate-900">
-            Active Verified Lord Ganesh Idols
-          </h3>
-
+          <h3 className="font-heading font-extrabold text-lg text-slate-900">Active Verified Lord Ganesh Idols</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
@@ -382,22 +429,14 @@ export const AdminDashboard = () => {
                 {idols.map((idol) => (
                   <tr key={idol.id}>
                     <td className="p-3">
-                      <img
-                        src={idol.image_url}
-                        alt={idol.name}
-                        className="w-12 h-10 rounded-lg object-cover bg-slate-100"
-                      />
+                      <img src={idol.image_url} alt={idol.name} className="w-12 h-10 rounded-lg object-cover bg-slate-100" />
                     </td>
                     <td className="p-3 font-bold text-slate-900">{idol.name}</td>
                     <td className="p-3 text-slate-600">{idol.area}</td>
                     <td className="p-3"><CrowdBadge status={idol.crowd_status} /></td>
                     <td className="p-3 text-emerald-700 font-bold">{idol.eco_status}</td>
                     <td className="p-3 text-right">
-                      <button
-                        onClick={() => handleDeleteIdol(idol.id)}
-                        className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100"
-                        title="Delete Idol"
-                      >
+                      <button onClick={() => handleDeleteIdol(idol.id)} className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100" title="Delete Idol">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
@@ -409,7 +448,7 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Submission Details Inspector Modal */}
+      {/* Inspector Modal */}
       {selectedSub && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -430,24 +469,9 @@ export const AdminDashboard = () => {
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setSelectedSub(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => handleReject(selectedSub.id)}
-                className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold"
-              >
-                Reject
-              </button>
-              <button
-                onClick={() => handleApprove(selectedSub.id)}
-                className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold"
-              >
-                Approve & Publish Live
-              </button>
+              <button onClick={() => setSelectedSub(null)} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Close</button>
+              <button onClick={() => handleRejectSubmission(selectedSub.id)} className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Reject</button>
+              <button onClick={() => handleApproveSubmission(selectedSub.id)} className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Approve & Publish Live</button>
             </div>
           </div>
         </div>

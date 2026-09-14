@@ -18,7 +18,6 @@ export const IdolCard = ({ idol }) => {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
         {/* Badges Overlay */}
@@ -75,6 +74,27 @@ export const IdolCard = ({ idol }) => {
             <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <span>Timings: {idol.opening_time || '06:00 AM'} – {idol.closing_time || '10:30 PM'}</span>
           </p>
+
+          {/* Activity Badges on Idol Cards */}
+          {(idol.has_prasadam || idol.has_annadanam || idol.has_uregimpu) && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-2">
+              {idol.has_prasadam && (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-200">
+                  🙏 Prasadam
+                </span>
+              )}
+              {idol.has_annadanam && (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-orange-100 text-orange-900 border border-orange-200">
+                  🍚 Annadanam
+                </span>
+              )}
+              {idol.has_uregimpu && (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-purple-100 text-purple-900 border border-purple-200">
+                  🥁 Uregimpu
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Buttons */}

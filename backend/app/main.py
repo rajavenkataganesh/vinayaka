@@ -7,7 +7,7 @@ from app.config import settings
 from app.services.seed_data import seed_database
 
 # Routers
-from app.routes import auth, idols, submissions, ai, admin, reports, ratings
+from app.routes import auth, idols, submissions, ai, admin, reports, ratings, activities
 
 # Create DB tables
 Base.metadata.create_all(bind=engine)
@@ -21,14 +21,14 @@ finally:
 
 app = FastAPI(
     title="GaneshMap API",
-    description="Backend API for GaneshMap - Find Ganesh Idols Near You",
-    version="1.0.0"
+    description="Backend API for GaneshMap - Find Ganesh Idols & Seva Activities Near You",
+    version="1.1.0"
 )
 
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all origins for dev & mobile testing
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,13 +46,14 @@ app.include_router(ai.router)
 app.include_router(admin.router)
 app.include_router(reports.router)
 app.include_router(ratings.router)
+app.include_router(activities.router)
 
 @app.get("/api/health")
 def health_check():
     return {
         "status": "healthy",
         "service": "GaneshMap Backend API",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "database": "connected"
     }
 

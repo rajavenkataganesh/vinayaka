@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Attach Authorization Token to requests if logged in
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ganeshmap_token');
   if (token) {
@@ -19,18 +18,19 @@ api.interceptors.request.use((config) => {
 });
 
 // Idols APIs
-export const fetchAllIdols = async (area = '', ecoStatus = '') => {
+export const fetchAllIdols = async (area = '', ecoStatus = '', activityType = '') => {
   const params = {};
   if (area) params.area = area;
   if (ecoStatus) params.eco_status = ecoStatus;
+  if (activityType) params.activity_type = activityType;
   const res = await api.get('/idols', { params });
   return res.data;
 };
 
-export const fetchNearbyIdols = async (lat, lng, radiusKm = 50) => {
-  const res = await api.get('/idols/nearby', {
-    params: { latitude: lat, longitude: lng, radius_km: radiusKm }
-  });
+export const fetchNearbyIdols = async (lat, lng, radiusKm = 50, activityType = '') => {
+  const params = { latitude: lat, longitude: lng, radius_km: radiusKm };
+  if (activityType) params.activity_type = activityType;
+  const res = await api.get('/idols/nearby', { params });
   return res.data;
 };
 
@@ -51,6 +51,45 @@ export const fetchIdolDetail = async (id, userLat = null, userLng = null) => {
 
 export const fetchPublicStats = async () => {
   const res = await api.get('/idols/stats');
+  return res.data;
+};
+
+// Activities APIs
+export const fetchIdolActivities = async (idolId) => {
+  const res = await api.get(`/activities/idol/${idolId}`);
+  return res.data;
+};
+
+export const fetchNearbyActivities = async (lat, lng, activityType = '', radiusKm = 50) => {
+  const params = { latitude: lat, longitude: lng, radius_km: radiusKm };
+  if (activityType) params.activity_type = activityType;
+  const res = await api.get('/activities/nearby', { params });
+  return res.data;
+};
+
+export const fetchAllActivities = async (type = '') => {
+  const params = type ? { type } : {};
+  const res = await api.get('/activities', { params });
+  return res.data;
+};
+
+export const createActivity = async (idolId, activityData) => {
+  const res = await api.post(`/activities/idol/${idolId}`, activityData);
+  return res.data;
+};
+
+export const approveActivity = async (id) => {
+  const res = await api.put(`/activities/admin/${id}/approve`);
+  return res.data;
+};
+
+export const updateActivity = async (id, data) => {
+  const res = await api.put(`/activities/${id}`, data);
+  return res.data;
+};
+
+export const deleteActivity = async (id) => {
+  const res = await api.delete(`/activities/${id}`);
   return res.data;
 };
 
@@ -103,6 +142,12 @@ export const fetchAdminStats = async () => {
 export const fetchAdminSubmissions = async (statusFilter = '') => {
   const params = statusFilter ? { status_filter: statusFilter } : {};
   const res = await api.get('/admin/submissions', { params });
+  return res.data;
+};
+
+export const fetchAdminActivities = async (statusFilter = '') => {
+  const params = statusFilter ? { status_filter: statusFilter } : {};
+  const res = await api.get('/admin/activities', { params });
   return res.data;
 };
 

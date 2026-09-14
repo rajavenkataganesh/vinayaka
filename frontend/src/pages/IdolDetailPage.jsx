@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Navigation, Share2, AlertTriangle, Star, Clock, Calendar, Phone, User, ShieldCheck, Leaf, ArrowLeft, Heart, MessageSquare } from 'lucide-react';
+import { MapPin, Navigation, Share2, AlertTriangle, Star, Clock, Calendar, Phone, User, ShieldCheck, Leaf, ArrowLeft, MessageSquare, Sparkles, Plus } from 'lucide-react';
 import CrowdBadge from '../components/CrowdBadge';
 import ReportModal from '../components/ReportModal';
 import RatingModal from '../components/RatingModal';
-import { fetchIdolDetail, fetchIdolRatings } from '../services/api';
+import ActivityCard from '../components/ActivityCard';
+import AddActivityModal from '../components/AddActivityModal';
+import MapView from '../components/MapView';
+import { fetchIdolDetail, fetchIdolRatings, fetchIdolActivities } from '../services/api';
 import { formatDistance, getGoogleMapsDirectionsUrl } from '../services/geo';
 
 export const IdolDetailPage = ({ userLocation }) => {
   const { id } = useParams();
   const [idol, setIdol] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedShare, setCopiedShare] = useState(false);
 
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
+  const [isAddActivityOpen, setIsAddActivityOpen] = useState(false);
 
   useEffect(() => {
     loadIdolData();
@@ -31,6 +38,9 @@ export const IdolDetailPage = ({ userLocation }) => {
 
       const revs = await fetchIdolRatings(id);
       setReviews(revs);
+
+      const acts = await fetchIdolActivities(id);
+      setActivities(acts);
     } catch (err) {
       console.error("Failed to fetch idol detail:", err);
     } finally {
@@ -74,10 +84,15 @@ export const IdolDetailPage = ({ userLocation }) => {
 
   const isEco = idol.eco_status === 'Eco-Friendly';
 
+  // Group activities by type
+  const prasadamList = activities.filter((a) => a.activity_type === 'prasadam');
+  const annadanamList = activities.filter((a) => a.activity_type === 'annadanam');
+  const uregimpuList = activities.filter((a) => a.activity_type === 'uregimpu');
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
-      {/* Back Button */}
+      {/* Back Link */}
       <Link
         to="/map"
         className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-orange-600 transition-colors"
@@ -85,7 +100,7 @@ export const IdolDetailPage = ({ userLocation }) => {
         <ArrowLeft className="w-4 h-4" /> Back to Explore Map
       </Link>
 
-      {/* Main Banner Image Card */}
+      {/* Hero Banner Image */}
       <div className="relative h-80 sm:h-96 w-full rounded-3xl overflow-hidden shadow-xl border border-orange-100 bg-slate-900">
         <img
           src={idol.image_url || 'https://images.unsplash.com/photo-1567591377030-de198b9d5186?auto=format&fit=crop&w=800&q=80'}
@@ -93,7 +108,6 @@ export const IdolDetailPage = ({ userLocation }) => {
           className="w-full h-full object-cover opacity-90"
         />
 
-        {/* Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
 
         {/* Floating Badges */}
@@ -108,7 +122,7 @@ export const IdolDetailPage = ({ userLocation }) => {
           </span>
         </div>
 
-        {/* Bottom Banner Content */}
+        {/* Bottom Banner Title */}
         <div className="absolute bottom-6 left-6 right-6 space-y-2 text-white">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded bg-orange-500 text-[11px] font-extrabold uppercase tracking-wider">
@@ -174,12 +188,101 @@ export const IdolDetailPage = ({ userLocation }) => {
         </div>
       </div>
 
+      {/* 🎉 FESTIVAL ACTIVITIES SECTION */}
+      <section className="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-600 flex items-center gap-1">
+              <Sparkles className="w-4 h-4" /> Pandal Program Schedule
+            </span>
+            <h2 className="font-heading font-extrabold text-2xl text-slate-900">
+              🎉 Festival Activities & Seva Information
+            </h2>
+          </div>
+
+          <button
+            onClick={() => setIsAddActivityOpen(true)}
+            className="px-4 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-bold flex items-center gap-1 border border-orange-200 self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Seva Activity
+          </button>
+        </div>
+
+        {activities.length === 0 ? (
+          <div className="p-6 text-center bg-orange-50/50 rounded-2xl border border-orange-100 space-y-1">
+            <p className="text-sm font-bold text-slate-700">Information not provided yet.</p>
+            <p className="text-xs text-slate-500">Organizers can submit Prasadam, Annadanam, and Uregimpu details by clicking "+ Add Seva Activity".</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            
+            {/* 🙏 Prasadam Section */}
+            {prasadamList.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-heading font-extrabold text-base text-amber-900 flex items-center gap-2">
+                  <span>🙏</span> Prasadam Seva ({prasadamList.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {prasadamList.map((act) => (
+                    <ActivityCard key={act.id} activity={act} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 🍚 Annadanam Section */}
+            {annadanamList.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-heading font-extrabold text-base text-orange-900 flex items-center gap-2">
+                  <span>🍚</span> Annadanam Meal Seva ({annadanamList.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {annadanamList.map((act) => (
+                    <ActivityCard key={act.id} activity={act} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 🥁 Uregimpu Procession Section */}
+            {uregimpuList.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-heading font-extrabold text-base text-purple-900 flex items-center gap-2">
+                  <span>🥁</span> Ganesh Uregimpu / Procession ({uregimpuList.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {uregimpuList.map((act) => (
+                    <ActivityCard key={act.id} activity={act} onSelectRoute={(act) => setSelectedRoute(act)} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        )}
+      </section>
+
+      {/* Procession Route Map Renderer if Selected */}
+      {selectedRoute && (
+        <section className="bg-white p-6 rounded-3xl border border-purple-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-heading font-extrabold text-lg text-purple-950 flex items-center gap-2">
+              <span>🥁</span> Procession Route Map: {selectedRoute.title}
+            </h3>
+            <button
+              onClick={() => setSelectedRoute(null)}
+              className="text-xs font-bold text-slate-500 hover:text-slate-800"
+            >
+              Hide Route Map ✕
+            </button>
+          </div>
+          <MapView idols={[idol]} userLocation={userLocation} selectedRoute={selectedRoute} height="400px" />
+        </section>
+      )}
+
       {/* Details Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Left 2 Columns: Schedule & Overview */}
         <div className="md:col-span-2 space-y-6">
-          
           <div className="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-4">
             <h3 className="font-heading font-extrabold text-lg text-slate-900">
               About This Pandal
@@ -207,7 +310,6 @@ export const IdolDetailPage = ({ userLocation }) => {
             </div>
           </div>
 
-          {/* Organizer & Contact Info */}
           <div className="bg-white p-6 rounded-3xl border border-orange-100 shadow-sm space-y-3">
             <h3 className="font-heading font-extrabold text-lg text-slate-900">
               Organizer & Contact Information
@@ -269,10 +371,8 @@ export const IdolDetailPage = ({ userLocation }) => {
               </div>
             )}
           </div>
-
         </div>
 
-        {/* Right Column: Location Map & Coordinates */}
         <div className="space-y-6">
           <div className="bg-white p-5 rounded-3xl border border-orange-100 shadow-sm space-y-3">
             <h4 className="font-heading font-bold text-sm text-slate-900 flex items-center gap-1.5">
@@ -294,10 +394,17 @@ export const IdolDetailPage = ({ userLocation }) => {
             </a>
           </div>
         </div>
-
       </div>
 
       {/* Modals */}
+      <AddActivityModal
+        isOpen={isAddActivityOpen}
+        onClose={() => setIsAddActivityOpen(false)}
+        idolId={idol.id}
+        idolName={idol.name}
+        onSuccess={loadIdolData}
+      />
+
       <ReportModal
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}

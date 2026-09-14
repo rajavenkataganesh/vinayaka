@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Compass, Sparkles, ShieldCheck, Award, Heart, CheckCircle2, ChevronRight, Navigation, Loader2 } from 'lucide-react';
+import { MapPin, Compass, Sparkles, ChevronRight, Loader2, Calendar } from 'lucide-react';
 import MapView from '../components/MapView';
 import IdolCard from '../components/IdolCard';
+import ActivityCard from '../components/ActivityCard';
 import SearchBar from '../components/SearchBar';
 import EcoGuideSection from '../components/EcoGuideSection';
 import GaneshIcon from '../components/GaneshIcon';
-import { fetchNearbyIdols, fetchAllIdols, fetchPublicStats } from '../services/api';
+import { fetchNearbyIdols, fetchAllIdols, fetchPublicStats, fetchNearbyActivities, fetchAllActivities } from '../services/api';
 import { getCurrentPosition } from '../services/geo';
 
 export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) => {
   const navigate = useNavigate();
   const [idols, setIdols] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState({
     verified_idols: 7,
     registered_areas: 5,
     eco_friendly_idols: 6,
-    community_submissions: 1
+    total_activities: 5
   });
 
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
 
   useEffect(() => {
     loadInitialData();
-  }, []);
+  }, [userLocation]);
 
   const loadInitialData = async () => {
     setLoading(true);
@@ -34,12 +36,18 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
       if (statsData) setStats(statsData);
 
       let idolList = [];
+      let activityList = [];
+
       if (userLocation) {
         idolList = await fetchNearbyIdols(userLocation.lat, userLocation.lng);
+        activityList = await fetchNearbyActivities(userLocation.lat, userLocation.lng);
       } else {
         idolList = await fetchAllIdols();
+        activityList = await fetchAllActivities();
       }
+
       setIdols(idolList);
+      setActivities(activityList);
     } catch (err) {
       console.error("Failed to load home page data:", err);
     } finally {
@@ -53,10 +61,12 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
     try {
       const pos = await onRequestLocation();
       if (pos) {
-        setLocationStatus('Finding nearby verified Lord Ganesh idols...');
+        setLocationStatus('Finding nearby Lord Ganesh idols & active sevas...');
         const nearby = await fetchNearbyIdols(pos.lat, pos.lng);
+        const nearbyActs = await fetchNearbyActivities(pos.lat, pos.lng);
         setIdols(nearby);
-        setLocationStatus(`Found ${nearby.length} Lord Ganesh idols near your location!`);
+        setActivities(nearbyActs);
+        setLocationStatus(`Found ${nearby.length} Lord Ganesh idols & ${nearbyActs.length} active sevas near your location!`);
       }
     } catch (err) {
       setLocationStatus(err.message || 'Location permission denied. Showing all areas.');
@@ -92,12 +102,12 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
               <span className="text-3xl">🕉️</span>
             </div>
             <span className="block text-2xl sm:text-4xl font-extrabold bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 bg-clip-text text-transparent mt-2">
-              Find Lord Ganesh Idols Near You
+              Find Lord Ganesh Idols & Seva Activities Near You
             </span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-600 leading-relaxed">
-            Discover verified Lord Ganesh idols, grand pandals, darshan timings, crowd levels, and eco-friendly immersion spots in Vijayawada, Mangalagiri, Guntur, Amaravati, Hyderabad & beyond.
+            Discover verified Lord Ganesh idols, Prasadam (🙏), Annadanam (🍚), and Uregimpu processions (🥁) in Vijayawada, Mangalagiri, Guntur, Amaravati, Hyderabad & beyond.
           </p>
 
           {/* Call to Actions */}
@@ -173,15 +183,54 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
           </div>
 
           <div className="text-center p-3">
-            <span className="block font-heading font-black text-3xl sm:text-4xl text-red-600">
-              {stats.community_submissions}
+            <span className="block font-heading font-black text-3xl sm:text-4xl text-purple-600">
+              {stats.total_activities || activities.length}
             </span>
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Community Submissions
+              Active Sevas & Processions
             </span>
           </div>
 
         </div>
+      </section>
+
+      {/* 🎉 WHAT'S HAPPENING NEAR YOU SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-600 flex items-center gap-1">
+              <Sparkles className="w-4 h-4" /> Real-time Seva Schedule
+            </span>
+            <h2 className="font-heading font-extrabold text-2xl text-slate-900">
+              🎉 What's Happening Near You?
+            </h2>
+          </div>
+
+          <button
+            onClick={() => navigate('/map?filter=activities')}
+            className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+          >
+            Explore All Seva Programs <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 rounded-2xl bg-slate-200 animate-pulse"></div>
+            ))}
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="p-8 text-center bg-white rounded-3xl border border-orange-100 text-xs font-bold text-slate-500">
+            No activity information provided yet for your area.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activities.slice(0, 6).map((act) => (
+              <ActivityCard key={act.id} activity={act} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* INTERACTIVE MAP PREVIEW */}
@@ -240,7 +289,6 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
       {/* HOW IT WORKS SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="p-8 sm:p-12 rounded-3xl bg-white border border-orange-100 shadow-sm space-y-8">
-          
           <div className="text-center space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
               Simple 4-Step Process
@@ -251,8 +299,7 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <div className="p-5 rounded-2xl bg-orange-50/60 border border-orange-100 space-y-2 relative">
+            <div className="p-5 rounded-2xl bg-orange-50/60 border border-orange-100 space-y-2">
               <div className="w-10 h-10 rounded-xl bg-orange-500 text-white font-extrabold flex items-center justify-center text-base">
                 1
               </div>
@@ -276,9 +323,9 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
               <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white font-extrabold flex items-center justify-center text-base">
                 3
               </div>
-              <h3 className="font-heading font-bold text-base text-slate-900">🗺️ Explore the Map</h3>
+              <h3 className="font-heading font-bold text-base text-slate-900">🎉 Check Prasadam & Sevas</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Check darshan timings, crowd status (🟢 Low, 🟡 Med, 🔴 High), ratings, and eco-friendly status.
+                Know where Prasadam (🙏) and Annadanam (🍚) are available, or track Uregimpu processions (🥁).
               </p>
             </div>
 
@@ -291,9 +338,7 @@ export const HomePage = ({ onOpenAddModal, userLocation, onRequestLocation }) =>
                 Click Get Directions to open turn-by-turn navigation from your current location straight to the pandal!
               </p>
             </div>
-
           </div>
-
         </div>
       </section>
 
