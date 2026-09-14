@@ -1,3 +1,5 @@
+node_modules/
+dist/
 # Node / React Frontend
 frontend/node_modules/
 frontend/dist/
